@@ -5,104 +5,106 @@ module BrightProof;
 * Warning: Doesn't compares Identifier and Meta.
 * Return: true if equal.
 */
-bool eq(SemVer a, SemVer b) {
-	return (a.Major == b.Major) &&
-		(a.Minor == b.Minor) &&
-		(a.Patch == a.Patch);
+deprecated("Use a == b or a != b. This function must be deleted in 1.0.0") {
+	bool eq(SemVer a, SemVer b) {
+		return (a.Major == b.Major) &&
+			(a.Minor == b.Minor) &&
+			(a.Patch == b.Patch);
+	}
+	///
+	unittest {
+		assert(eq(SemVer("1.0.0"), SemVer("1.0.0-beta+build"))); //Euyp, they are equal. 
+		assert(!eq(SemVer("2.0.0"), SemVer("1.0.0")));
+	}
 }
-///
-unittest {
-	assert(eq(SemVer("1.0.0"), SemVer("1.0.0-beta+build"))); //Euyp, they are equal. 
-	assert(!eq(SemVer("2.0.0"), SemVer("1.0.0")));
-}
-
-/**
-* Are a greater than b?
-* Warning: Doesn't compares Identifier and Meta.
-* Return: true if greater.
-*/
-bool gt(SemVer a, SemVer b) {
-	if(a.Major > b.Major) {
-		return true;
-	} else if(a.Major == b.Major) {
-		if(a.Minor > b.Minor) {
+deprecated("Use a < b, a > b, a >= b, a <= b. This function must be deleted in 1.0.0") {
+	/**
+	* Are a greater than b?
+	* Warning: Doesn't compares Identifier and Meta.
+	* Return: true if greater.
+	*/
+	bool gt(SemVer a, SemVer b) {
+		if(a.Major > b.Major) {
 			return true;
-		} else if(a.Minor == b.Minor) {
-			if(a.Patch > b.Patch) {
+		} else if(a.Major == b.Major) {
+			if(a.Minor > b.Minor) {
 				return true;
+			} else if(a.Minor == b.Minor) {
+				if(a.Patch > b.Patch) {
+					return true;
+				} else {
+					return false;
+				}
 			} else {
 				return false;
 			}
 		} else {
 			return false;
 		}
-	} else {
-		return false;
 	}
-}
-///
-unittest {
-	assert(!gt(SemVer("1.0.0"), SemVer("1.0.0-beta+build")));
-	assert(gt(SemVer("2.0.0"), SemVer("1.0.0")));
-}
+	///
+	unittest {
+		assert(!gt(SemVer("1.0.0"), SemVer("1.0.0-beta+build")));
+		assert(gt(SemVer("2.0.0"), SemVer("1.0.0")));
+	}
 
-/**
-* Are a greater than or equal to b?
-* Warning: Doesn't compares Identifier and Meta.
-* Return: true if greater or equal.
-*/
-bool ge(SemVer a, SemVer b) {
-	return eq(a, b) || gt(a, b);
-}
-///
-unittest {
-	assert(ge(SemVer("1.0.0"), SemVer("1.0.0-beta+build")));
-	assert(ge(SemVer("2.0.0"), SemVer("1.0.0")));
-}
+	/**
+	* Are a greater than or equal to b?
+	* Warning: Doesn't compares Identifier and Meta.
+	* Return: true if greater or equal.
+	*/
+	bool ge(SemVer a, SemVer b) {
+		return eq(a, b) || gt(a, b);
+	}
+	///
+	unittest {
+		assert(ge(SemVer("1.0.0"), SemVer("1.0.0-beta+build")));
+		assert(ge(SemVer("2.0.0"), SemVer("1.0.0")));
+	}
 
-/**
-* Are a less than b?
-* Warning: Doesn't compares Identifier and Meta.
-* Return: true if less.
-*/
-bool lt(SemVer a, SemVer b) {
-	if(a.Major < b.Major) {
-		return true;
-	} else if(a.Major == b.Major) {
-		if(a.Minor < b.Minor) {
+	/**
+	* Are a less than b?
+	* Warning: Doesn't compares Identifier and Meta.
+	* Return: true if less.
+	*/
+	bool lt(SemVer a, SemVer b) {
+		if(a.Major < b.Major) {
 			return true;
-		} else if(a.Minor == b.Minor) {
-			if(a.Patch < b.Patch) {
+		} else if(a.Major == b.Major) {
+			if(a.Minor < b.Minor) {
 				return true;
+			} else if(a.Minor == b.Minor) {
+				if(a.Patch < b.Patch) {
+					return true;
+				} else {
+					return false;
+				}
 			} else {
 				return false;
 			}
 		} else {
 			return false;
 		}
-	} else {
-		return false;
+	}
+	unittest {
+		assert(!lt(SemVer("1.0.0"), SemVer("1.0.0-beta+build")));
+		assert(!lt(SemVer("2.0.0"), SemVer("1.0.0")));
+	}
+
+	/**
+	* Are a less than or equal to b?
+	* Warning: Doesn't compares Identifier and Meta.
+	* Return: true if less or equal.
+	*/
+	bool le(SemVer a, SemVer b) {
+		return eq(a, b) || lt(a, b);
+	}
+	///
+	unittest {
+		assert(le(SemVer("1.0.0"), SemVer("1.0.0-beta+build")));
+		assert(!le(SemVer("2.0.0"), SemVer("1.0.0")));
 	}
 }
-unittest {
-	assert(!lt(SemVer("1.0.0"), SemVer("1.0.0-beta+build")));
-	assert(!lt(SemVer("2.0.0"), SemVer("1.0.0")));
-}
-
-/**
-* Are a less than or equal to b?
-* Warning: Doesn't compares Identifier and Meta.
-* Return: true if less or equal.
-*/
-bool le(SemVer a, SemVer b) {
-	return eq(a, b) || lt(a, b);
-}
-///
-unittest {
-	assert(le(SemVer("1.0.0"), SemVer("1.0.0-beta+build")));
-	assert(!le(SemVer("2.0.0"), SemVer("1.0.0")));
-}
-
 /**
 * Main struct
 */
