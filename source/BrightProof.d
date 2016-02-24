@@ -118,7 +118,7 @@ struct SemVer {
 	* Throws: Exception if there is any syntax errors.
 	*/
 	this(string i) {
-		import std.string : indexOf;
+		import std.string : indexOf, isNumeric;
 		import std.conv : to;
 
 		auto MajorDot = indexOf(i, ".", 0);
@@ -144,51 +144,46 @@ struct SemVer {
 			throw new Exception("There is no meta version string");
 		}
 
-		if(isNumberString(i[0..MajorDot])) {
+		if(i[0..MajorDot].isNumeric) {
 			SVMajor = to!size_t(i[0..MajorDot]);
 		} else {
 			throw new Exception("There is a non-number characters in major");
 		}
 		
-		if(isNumberString(i[MajorDot+1..MinorDot])) {
+		if(i[MajorDot+1..MinorDot].isNumeric) {
 			SVMinor = to!size_t(i[MajorDot+1..MinorDot]);
 		} else {
 			throw new Exception("There is a non-number characters in minor");
 		}
 
 		if(IdentifierStart != -1) {
-			if(isNumberString(i[MinorDot+1..IdentifierStart])) {
+			if(i[MinorDot+1..IdentifierStart].isNumeric) {
 				SVPatch = to!size_t(i[MinorDot+1..IdentifierStart]);
 			} else {
 				throw new Exception("There is a non-number in patch");
 			}
 			if(MetaStart != -1) {
 				SVIdentifier = i[IdentifierStart+1..MetaStart];
+				SVMeta = i[MetaStart+1..$];
 			} else {
 				SVIdentifier = i[IdentifierStart+1..$];
 			}
 		} else {
 			if(MetaStart != -1) {
-				if(isNumberString(i[MinorDot+1..MetaStart])) {
+				if(i[MinorDot+1..MetaStart].isNumeric) {
 					SVPatch = to!size_t(i[MinorDot+1..MetaStart]);
 				} else {
 					throw new Exception("There is a non-number in patch");
 				}
 				SVMeta = i[MetaStart+1..$];
 			} else {
-				if(isNumberString(i[MinorDot+1..$])) {
+				if(i[MinorDot+1..$].isNumeric) {
 					SVPatch = to!size_t(i[MinorDot+1..$]);
 				} else {
 					throw new Exception("There is a non-number in patch");
 				}
 			}
 		}
-	}
-
-	private bool isNumberString(string i) {
-		import std.string : indexOfAny;
-		import std.ascii : letters;
-		return i.indexOfAny(letters) == -1;
 	}
 
 	/**
@@ -246,6 +241,64 @@ struct SemVer {
 	/// ditto
 	@property void Meta(string m) {
 		SVMeta = m;
+	}
+
+	bool opEquals()(auto ref const SemVer b) const {
+		return (this.SVMajor == b.SVMajor) &&
+			(this.SVMinor == b.SVMinor) &&
+			(this.SVPatch == b.SVPatch) &&
+			(this.SVIdentifier == b.SVIdentifier) &&
+			(this.SVMeta == b.SVMeta);
+	}
+
+	int opCmp(ref const SemVer b) const {
+		if(this.SVMajor != b.SVMajor)
+			return this.SVMajor < b.SVMajor ? -1 : 1;
+		else if(this.SVMinor != b.SVMinor)
+			return this.SVMinor < b.SVMinor ? -1 : 1;
+		else if(this.SVMajor != b.SVMajor)
+			return this.SVMajor < b.SVMajor ? -1 : 1;
+
+		if(this.SVIdentifier && b.SVIdentifier) {
+			return cmpString(this.SVIdentifier, b.SVIdentifier);
+		} else if(this.SVIdentifier) {
+			return 1;
+		} else if(b.SVIdentifier) {
+			return -1;
+		}
+
+		if(this.SVMeta && b.SVMeta) {
+			return cmpString(this.SVMeta, b.SVMeta);
+		} else if(this.SVMeta) {
+			return 1;
+		} else if(b.SVMeta) {
+			return -1;
+		}
+
+		return 0;
+	}
+
+	int opCmp(in SemVer b) const {
+		return this.opCmp(b);
+	}
+
+	private int cmpString(const string a, const string b) const {
+		size_t i;
+		while(true) {
+			if((a.length == i) && (b.length == i)) {
+				return 0;
+			} else if(a.length == i) {
+				return -1;
+			} else if(b.length == i) {
+				return 1;
+			}
+
+			if(a[i] == b[i]) {
+				i++;
+			} else {
+				return a[i] < b[i] ? -1 : 1;
+			}
+		}
 	}
 }
 ///
