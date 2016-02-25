@@ -15,12 +15,17 @@ ver.Major++;
 ver.toString == "1.0.2-beta";
 ```
 
-## Functions
-- *eq* are operands equal?
-- *gt* are a > b?
-- *ge* are a >= b ?
-- *lt* are a < b?
-- *le* are a <= b ?
+## Comparing
+SemVer structs can be compared via `<`, `>`, `==`, `>=`, `<=`, just like any other values.
+Also, Identifiers and Metas now compared too:
+```
+SemVer("1.0.0-rc.1") < SemVer("1.0.0-rc.20");
+SemVer("1.0.0-rc.1") < SemVer("1.0.0");
+SemVer("1.0.0-rc.1") < SemVer("1.0.0+build.1");
+```
 
 ## Example
 Aviable in `./example`.
+
+## TODO
+- [ ] Change Identifier -> PreRelease and Meta -> Build in 1.0.0.
