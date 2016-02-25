@@ -6,6 +6,10 @@
 	"license": "MIT",
 	"targetType": "library",
 	"subPackages": [
-		"./example"
-	]
+		"./example",
+		"./test"
+	],
+	"dependencies": {
+		"natcmp": "~>1.3.1"
+	}
 }

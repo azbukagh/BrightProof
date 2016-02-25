@@ -105,14 +105,20 @@ deprecated("Use a < b, a > b, a >= b, a <= b. This function must be deleted in 1
 		assert(!le(SemVer("2.0.0"), SemVer("1.0.0")));
 	}
 }
+
 /**
 * Main struct
+* Examples:
+* ---
+* SemVer("1.0.0");
+* SemVer("1.0.0+4444");
+* SemVer("1.0.0-eyyyyup");
+* SemVer("1.0.0-yay+build");
+* ---
 */
 struct SemVer {
-	private {
-		size_t SVMajor, SVMinor, SVPatch;
-		string SVIdentifier, SVMeta;
-	}
+	size_t Major, Minor, Patch;
+	string Identifier, Meta;
 
 	/**
 	* Params:
@@ -147,45 +153,62 @@ struct SemVer {
 		}
 
 		if(i[0..MajorDot].isNumeric) {
-			SVMajor = to!size_t(i[0..MajorDot]);
+			Major = to!size_t(i[0..MajorDot]);
 		} else {
 			throw new Exception("There is a non-number characters in major");
 		}
 		
 		if(i[MajorDot+1..MinorDot].isNumeric) {
-			SVMinor = to!size_t(i[MajorDot+1..MinorDot]);
+			Minor = to!size_t(i[MajorDot+1..MinorDot]);
 		} else {
 			throw new Exception("There is a non-number characters in minor");
 		}
 
 		if(IdentifierStart != -1) {
 			if(i[MinorDot+1..IdentifierStart].isNumeric) {
-				SVPatch = to!size_t(i[MinorDot+1..IdentifierStart]);
+				Patch = to!size_t(i[MinorDot+1..IdentifierStart]);
 			} else {
 				throw new Exception("There is a non-number in patch");
 			}
 			if(MetaStart != -1) {
-				SVIdentifier = i[IdentifierStart+1..MetaStart];
-				SVMeta = i[MetaStart+1..$];
+				Identifier = i[IdentifierStart+1..MetaStart];
+				Meta = i[MetaStart+1..$];
 			} else {
-				SVIdentifier = i[IdentifierStart+1..$];
+				Identifier = i[IdentifierStart+1..$];
 			}
 		} else {
 			if(MetaStart != -1) {
 				if(i[MinorDot+1..MetaStart].isNumeric) {
-					SVPatch = to!size_t(i[MinorDot+1..MetaStart]);
+					Patch = to!size_t(i[MinorDot+1..MetaStart]);
 				} else {
 					throw new Exception("There is a non-number in patch");
 				}
-				SVMeta = i[MetaStart+1..$];
+				Meta = i[MetaStart+1..$];
 			} else {
 				if(i[MinorDot+1..$].isNumeric) {
-					SVPatch = to!size_t(i[MinorDot+1..$]);
+					Patch = to!size_t(i[MinorDot+1..$]);
 				} else {
 					throw new Exception("There is a non-number in patch");
 				}
 			}
 		}
+	}
+
+	void nextMajor() {
+		Major++;
+		Minor = Patch = 0;
+		Identifier.length = Meta.length = 0;
+	}
+
+	void nextMinor() {
+		Minor++;
+		Patch = 0;
+		Identifier.length = Meta.length = 0;
+	}
+
+	void nextPatch() {
+		Patch++;
+		Identifier = Meta = "";
 	}
 
 	/**
@@ -194,119 +217,72 @@ struct SemVer {
 	*/
 	string toString() {
 		import std.format : format;
-		string o = format("%d.%d.%d", SVMajor, SVMinor, SVPatch);
-		if(SVIdentifier)
-			o ~= format("-%s", SVIdentifier);
-		if(SVMeta)
-			o ~= format("+%s", SVMeta);
+		string o = format("%d.%d.%d", Major, Minor, Patch);
+		if(Identifier != "")
+			o ~= format("-%s", Identifier);
+		if(Meta != "")
+			o ~= format("+%s", Meta);
 		return o;
 	}
 
 	/**
-	* Get/set properties
+	* true, if this == b
 	*/
-	@property size_t Major() {
-		return SVMajor;
-	}
-	/// ditto
-	@property void Major(size_t m) {
-		SVMajor = m;
-	}
-	/// ditto
-	@property size_t Minor() {
-		return SVMinor;
-	}
-	/// ditto
-	@property void Minor(size_t m) {
-		SVMinor = m;
-	}
-	/// ditto
-	@property size_t Patch() {
-		return SVPatch;
-	}
-	/// ditto
-	@property void Patch(size_t p) {
-		SVPatch = p;
-	}
-	/// ditto
-	@property string Identifier() {
-		return SVIdentifier;
-	}
-	/// ditto
-	@property void Identifier(string i) {
-		SVIdentifier = i;
-	}
-	/// ditto
-	@property string Meta() {
-		return SVMeta;
-	}
-	/// ditto
-	@property void Meta(string m) {
-		SVMeta = m;
-	}
-
 	bool opEquals()(auto ref const SemVer b) const {
-		return (this.SVMajor == b.SVMajor) &&
-			(this.SVMinor == b.SVMinor) &&
-			(this.SVPatch == b.SVPatch) &&
-			(this.SVIdentifier == b.SVIdentifier) &&
-			(this.SVMeta == b.SVMeta);
+		return (this.Major == b.Major) &&
+			(this.Minor == b.Minor) &&
+			(this.Patch == b.Patch) &&
+			(this.Identifier == b.Identifier) &&
+			(this.Meta == b.Meta);
 	}
 
+	/**
+	* Compares two SemVer structs.
+	*/
 	int opCmp(ref const SemVer b) const {
-		if(this.SVMajor != b.SVMajor)
-			return this.SVMajor < b.SVMajor ? -1 : 1;
-		else if(this.SVMinor != b.SVMinor)
-			return this.SVMinor < b.SVMinor ? -1 : 1;
-		else if(this.SVMajor != b.SVMajor)
-			return this.SVMajor < b.SVMajor ? -1 : 1;
+		import natcmp;
+		if(this.Major != b.Major)
+			return this.Major < b.Major ? -1 : 1;
+		else if(this.Minor != b.Minor)
+			return this.Minor < b.Minor ? -1 : 1;
+		else if(this.Major != b.Major)
+			return this.Major < b.Major ? -1 : 1;
 
-		if(this.SVIdentifier && b.SVIdentifier) {
-			return cmpString(this.SVIdentifier, b.SVIdentifier);
-		} else if(this.SVIdentifier) {
-			return 1;
-		} else if(b.SVIdentifier) {
+		if((this.Identifier != "") && (b.Identifier != "")) {
+			int result = compareNatural(this.Identifier, b.Identifier);
+			if(result) {
+				return result;
+			}
+		} else if(this.Identifier != "") {
 			return -1;
+		} else if(b.Identifier != "") {
+			return 1;
 		}
 
-		if(this.SVMeta && b.SVMeta) {
-			return cmpString(this.SVMeta, b.SVMeta);
-		} else if(this.SVMeta) {
+		if((this.Meta != "") && (b.Meta != "")) {
+			return compareNatural(this.Identifier, b.Identifier);
+		} else if(this.Meta != "") {
 			return 1;
-		} else if(b.SVMeta) {
+		} else if(b.Meta != "") {
 			return -1;
 		}
-
 		return 0;
 	}
-
+	/// ditto
 	int opCmp(in SemVer b) const {
 		return this.opCmp(b);
 	}
-
-	private int cmpString(const string a, const string b) const {
-		size_t i;
-		while(true) {
-			if((a.length == i) && (b.length == i)) {
-				return 0;
-			} else if(a.length == i) {
-				return -1;
-			} else if(b.length == i) {
-				return 1;
-			}
-
-			if(a[i] == b[i]) {
-				i++;
-			} else {
-				return a[i] < b[i] ? -1 : 1;
-			}
-		}
+	///
+	unittest {
+		assert(SemVer("1.0.0-alpha") < SemVer("1.0.0-alpha.1"));
+		assert(SemVer("1.0.0-alpha.1") < SemVer("1.0.0-alpha.beta"));
+		assert(SemVer("1.0.0-alpha.beta") < SemVer("1.0.0-beta"));
+		assert(SemVer("1.0.0-beta") < SemVer("1.0.0-beta.2"));
+		assert(SemVer("1.0.0-beta.2") < SemVer("1.0.0-beta.11"));
+		assert(SemVer("1.0.0-beta.11") < SemVer("1.0.0-rc.1"));
+		assert(SemVer("1.0.0-rc.1") < SemVer("1.0.0"));
+		assert(SemVer("1.0.0-rc.1") < SemVer("1.0.0+build.9"));
+		assert(SemVer("1.0.0-rc.1") < SemVer("1.0.0-rc.1+build.5"));
+		assert(SemVer("1.0.0-rc.1+build.5") == SemVer("1.0.0-rc.1+build.5"));
 	}
-}
-///
-unittest {
-	SemVer("1.0.0");
-	SemVer("1.0.0+4444");
-	SemVer("1.0.0-eyyyyup");
-	SemVer("1.0.0-yay+build");
 }
