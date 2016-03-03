@@ -28,10 +28,10 @@ struct SemVer {
 		auto PreReleaseStart = indexOf(i, "-", MinorDot + 1);
 		auto BuildStart = indexOf(i, "+", PreReleaseStart + 1);
 
-		if((MajorDot == -1) || (MinorDot == -1)) { 
+		if((MajorDot == -1) || (MinorDot == -1)) {
 			// If there is no 2 dots - this is not complete semver.
 			throw new Exception("There is no major, minor or patch");
-		} else if(MajorDot < 1) { 
+		} else if(MajorDot < 1) {
 			// If first symbol is a dot, there is no Major.
 			throw new Exception("There is no major version number");
 		} else if((MinorDot < 1) || (MinorDot - MajorDot < 2)) {
@@ -59,7 +59,7 @@ struct SemVer {
 		} else {
 			throw new Exception("There is a non-number characters in major");
 		}
-		
+
 		if(i[MajorDot+1..MinorDot].isNumeric) {
 			Minor = to!size_t(i[MajorDot+1..MinorDot]);
 		} else {
