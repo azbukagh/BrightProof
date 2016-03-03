@@ -1,112 +1,6 @@
 module BrightProof;
 
 /**
-* Are a and b equal?
-* Warning: Doesn't compares Identifier and Meta.
-* Return: true if equal.
-*/
-deprecated("Use a == b or a != b. This function must be deleted in 1.0.0") {
-	bool eq(SemVer a, SemVer b) {
-		return (a.Major == b.Major) &&
-			(a.Minor == b.Minor) &&
-			(a.Patch == b.Patch);
-	}
-	///
-	unittest {
-		assert(eq(SemVer("1.0.0"), SemVer("1.0.0-beta+build"))); //Euyp, they are equal. 
-		assert(!eq(SemVer("2.0.0"), SemVer("1.0.0")));
-	}
-}
-deprecated("Use a < b, a > b, a >= b, a <= b. This function must be deleted in 1.0.0") {
-	/**
-	* Are a greater than b?
-	* Warning: Doesn't compares Identifier and Meta.
-	* Return: true if greater.
-	*/
-	bool gt(SemVer a, SemVer b) {
-		if(a.Major > b.Major) {
-			return true;
-		} else if(a.Major == b.Major) {
-			if(a.Minor > b.Minor) {
-				return true;
-			} else if(a.Minor == b.Minor) {
-				if(a.Patch > b.Patch) {
-					return true;
-				} else {
-					return false;
-				}
-			} else {
-				return false;
-			}
-		} else {
-			return false;
-		}
-	}
-	///
-	unittest {
-		assert(!gt(SemVer("1.0.0"), SemVer("1.0.0-beta+build")));
-		assert(gt(SemVer("2.0.0"), SemVer("1.0.0")));
-	}
-
-	/**
-	* Are a greater than or equal to b?
-	* Warning: Doesn't compares Identifier and Meta.
-	* Return: true if greater or equal.
-	*/
-	bool ge(SemVer a, SemVer b) {
-		return eq(a, b) || gt(a, b);
-	}
-	///
-	unittest {
-		assert(ge(SemVer("1.0.0"), SemVer("1.0.0-beta+build")));
-		assert(ge(SemVer("2.0.0"), SemVer("1.0.0")));
-	}
-
-	/**
-	* Are a less than b?
-	* Warning: Doesn't compares Identifier and Meta.
-	* Return: true if less.
-	*/
-	bool lt(SemVer a, SemVer b) {
-		if(a.Major < b.Major) {
-			return true;
-		} else if(a.Major == b.Major) {
-			if(a.Minor < b.Minor) {
-				return true;
-			} else if(a.Minor == b.Minor) {
-				if(a.Patch < b.Patch) {
-					return true;
-				} else {
-					return false;
-				}
-			} else {
-				return false;
-			}
-		} else {
-			return false;
-		}
-	}
-	unittest {
-		assert(!lt(SemVer("1.0.0"), SemVer("1.0.0-beta+build")));
-		assert(!lt(SemVer("2.0.0"), SemVer("1.0.0")));
-	}
-
-	/**
-	* Are a less than or equal to b?
-	* Warning: Doesn't compares Identifier and Meta.
-	* Return: true if less or equal.
-	*/
-	bool le(SemVer a, SemVer b) {
-		return eq(a, b) || lt(a, b);
-	}
-	///
-	unittest {
-		assert(le(SemVer("1.0.0"), SemVer("1.0.0-beta+build")));
-		assert(!le(SemVer("2.0.0"), SemVer("1.0.0")));
-	}
-}
-
-/**
 * Main struct
 * Examples:
 * ---
@@ -118,7 +12,7 @@ deprecated("Use a < b, a > b, a >= b, a <= b. This function must be deleted in 1
 */
 struct SemVer {
 	size_t Major, Minor, Patch;
-	string Identifier, Meta;
+	string PreRelease, Build;
 
 	/**
 	* Params:
@@ -131,27 +25,35 @@ struct SemVer {
 
 		auto MajorDot = indexOf(i, ".", 0);
 		auto MinorDot = indexOf(i, ".", MajorDot + 1);
-		auto IdentifierStart = indexOf(i, "-", MinorDot + 1);
-		auto MetaStart = indexOf(i, "+", IdentifierStart + 1);
+		auto PreReleaseStart = indexOf(i, "-", MinorDot + 1);
+		auto BuildStart = indexOf(i, "+", PreReleaseStart + 1);
 
-		if((MajorDot == -1) || (MinorDot == -1)) {
+		if((MajorDot == -1) || (MinorDot == -1)) { 
+			// If there is no 2 dots - this is not complete semver.
 			throw new Exception("There is no major, minor or patch");
-		} else if(MajorDot < 1) {
+		} else if(MajorDot < 1) { 
+			// If first symbol is a dot, there is no Major.
 			throw new Exception("There is no major version number");
 		} else if((MinorDot < 1) || (MinorDot - MajorDot < 2)) {
+			// If there is nothing between MajorDot and MinorDot.
 			throw new Exception("There is no minor version number");
 		} else if(
-			((IdentifierStart < 1) && (i.length - MinorDot < 2)) ||
-			((IdentifierStart >= 0) && (IdentifierStart - MinorDot < 2))) {
+			((PreReleaseStart < 1) && (i.length - MinorDot < 2)) ||
+			((PreReleaseStart >= 0) && (PreReleaseStart - MinorDot < 2))) {
+			// There is no Patch, if there is nothing after MinorDot.
+			// and string end or `-`.
 			throw new Exception("There is no patch version number");
 		} else if(
-			((MetaStart < 1) && (i.length - IdentifierStart < 2)) ||
-			((MetaStart >= 0) && (MetaStart - IdentifierStart < 2))) {
-				throw new Exception("There is no identifier version string");
-		} else if(i.length - MetaStart < 2) {
-			throw new Exception("There is no meta version string");
+			((BuildStart < 1) && (i.length - PreReleaseStart < 2)) ||
+			((BuildStart >= 0) && (BuildStart - PreReleaseStart < 2))) {
+			// There is nothing in PreRelease, if nothing follow `-` .
+				throw new Exception("There is no prerelease version string");
+		} else if(i.length - BuildStart < 2) {
+			// There is no in Build, if string ends after `+`.
+			throw new Exception("There is no build version string");
 		}
 
+		// Now we know where Major, Minor, Patch, PreRelease, Build starts and ends.
 		if(i[0..MajorDot].isNumeric) {
 			Major = to!size_t(i[0..MajorDot]);
 		} else {
@@ -164,26 +66,26 @@ struct SemVer {
 			throw new Exception("There is a non-number characters in minor");
 		}
 
-		if(IdentifierStart != -1) {
-			if(i[MinorDot+1..IdentifierStart].isNumeric) {
-				Patch = to!size_t(i[MinorDot+1..IdentifierStart]);
+		if(PreReleaseStart != -1) {
+			if(i[MinorDot+1..PreReleaseStart].isNumeric) {
+				Patch = to!size_t(i[MinorDot+1..PreReleaseStart]);
 			} else {
 				throw new Exception("There is a non-number in patch");
 			}
-			if(MetaStart != -1) {
-				Identifier = i[IdentifierStart+1..MetaStart];
-				Meta = i[MetaStart+1..$];
+			if(BuildStart != -1) {
+				PreRelease = i[PreReleaseStart+1..BuildStart];
+				Build = i[BuildStart+1..$];
 			} else {
-				Identifier = i[IdentifierStart+1..$];
+				PreRelease = i[PreReleaseStart+1..$];
 			}
 		} else {
-			if(MetaStart != -1) {
-				if(i[MinorDot+1..MetaStart].isNumeric) {
-					Patch = to!size_t(i[MinorDot+1..MetaStart]);
+			if(BuildStart != -1) {
+				if(i[MinorDot+1..BuildStart].isNumeric) {
+					Patch = to!size_t(i[MinorDot+1..BuildStart]);
 				} else {
 					throw new Exception("There is a non-number in patch");
 				}
-				Meta = i[MetaStart+1..$];
+				Build = i[BuildStart+1..$];
 			} else {
 				if(i[MinorDot+1..$].isNumeric) {
 					Patch = to!size_t(i[MinorDot+1..$]);
@@ -194,21 +96,30 @@ struct SemVer {
 		}
 	}
 
+	/**
+	* Next Major/Minor/Patch version
+	* Increments numbers with semver rules.
+	* Example:
+	* 	1.2.3 -> nextMajor -> 2.0.0
+	* 	1.2.3 -> nextMinor -> 1.3.0
+	* 	1.2.3 -> nextPatch -> 1.2.4
+	* 	1.2.3-rc.1+build.5 -> nextPatch -> 1.2.4
+	*/
 	void nextMajor() {
 		Major++;
 		Minor = Patch = 0;
-		Identifier.length = Meta.length = 0;
+		PreRelease.length = Build.length = 0;
 	}
-
+	/// ditto
 	void nextMinor() {
 		Minor++;
 		Patch = 0;
-		Identifier.length = Meta.length = 0;
+		PreRelease.length = Build.length = 0;
 	}
-
+	/// ditto
 	void nextPatch() {
 		Patch++;
-		Identifier = Meta = "";
+		PreRelease = Build = "";
 	}
 
 	/**
@@ -218,10 +129,10 @@ struct SemVer {
 	string toString() {
 		import std.format : format;
 		string o = format("%d.%d.%d", Major, Minor, Patch);
-		if(Identifier != "")
-			o ~= format("-%s", Identifier);
-		if(Meta != "")
-			o ~= format("+%s", Meta);
+		if(PreRelease != "")
+			o ~= format("-%s", PreRelease);
+		if(Build != "")
+			o ~= format("+%s", Build);
 		return o;
 	}
 
@@ -232,8 +143,8 @@ struct SemVer {
 		return (this.Major == b.Major) &&
 			(this.Minor == b.Minor) &&
 			(this.Patch == b.Patch) &&
-			(this.Identifier == b.Identifier) &&
-			(this.Meta == b.Meta);
+			(this.PreRelease == b.PreRelease) &&
+			(this.Build == b.Build);
 	}
 
 	/**
@@ -248,22 +159,22 @@ struct SemVer {
 		else if(this.Major != b.Major)
 			return this.Major < b.Major ? -1 : 1;
 
-		if((this.Identifier != "") && (b.Identifier != "")) {
-			int result = compareNatural(this.Identifier, b.Identifier);
+		if((this.PreRelease != "") && (b.PreRelease != "")) {
+			int result = compareNatural(this.PreRelease, b.PreRelease);
 			if(result) {
 				return result;
 			}
-		} else if(this.Identifier != "") {
+		} else if(this.PreRelease != "") {
 			return -1;
-		} else if(b.Identifier != "") {
+		} else if(b.PreRelease != "") {
 			return 1;
 		}
 
-		if((this.Meta != "") && (b.Meta != "")) {
-			return compareNatural(this.Identifier, b.Identifier);
-		} else if(this.Meta != "") {
+		if((this.Build != "") && (b.Build != "")) {
+			return compareNatural(this.PreRelease, b.PreRelease);
+		} else if(this.Build != "") {
 			return 1;
-		} else if(b.Meta != "") {
+		} else if(b.Build != "") {
 			return -1;
 		}
 		return 0;
