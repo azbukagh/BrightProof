@@ -28,4 +28,4 @@ SemVer("1.0.0-rc.1") < SemVer("1.0.0+build.1");
 Aviable in `./example`.
 
 ## TODO
-- [ ] Change Identifier -> PreRelease and Meta -> Build in 1.0.0.
+- [x] Change Identifier -> PreRelease and Meta -> Build in 1.0.0.
