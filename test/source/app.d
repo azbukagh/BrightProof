@@ -45,7 +45,7 @@ void validationTest() {
 		SemVer("1.0.0+4444");
 		SemVer("1.0.0-eyyyyup");
 		SemVer("1.0.0-yay+build");
-	} catch (Exception e) {
+	} catch (SemVerException e) {
 		error(e, __FUNCTION__);
 	}
 }
@@ -59,7 +59,7 @@ void buildTest() {
 		s.nextMinor;
 		s.nextMinor;
 		assert(s.toString == "35.2.0");
-	} catch (Exception e) {
+	} catch (SemVerException e) {
 		error(e, __FUNCTION__);
 	} catch (AssertError a) {
 		error(a, __FUNCTION__);

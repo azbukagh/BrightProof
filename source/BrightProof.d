@@ -1,4 +1,22 @@
 module BrightProof;
+/**
+* Exception for easy error handling
+*/
+class SemVerException : Exception {
+	 /**
+	* Params:
+	* 	msg = message
+	* 	file = file, where SemVerException have been throwed
+	* 	line = line number in file
+	* 	next = next exception
+	*/
+	@safe pure nothrow this(string msg,
+		string file = __FILE__,
+		size_t line = __LINE__,
+		Throwable next = null) {
+			super(msg, file, line, next);
+	}
+}
 
 /**
 * Main struct
@@ -17,7 +35,7 @@ struct SemVer {
 	/**
 	* Params:
 	*	i = input string
-	* Throws: Exception if there is any syntax errors.
+	* Throws: SemVerException if there is any syntax errors.
 	*/
 	this(string i) {
 		import std.string : indexOf, isNumeric;
@@ -30,47 +48,47 @@ struct SemVer {
 
 		if((MajorDot == -1) || (MinorDot == -1)) {
 			// If there is no 2 dots - this is not complete semver.
-			throw new Exception("There is no major, minor or patch");
+			throw new SemVerException("There is no major, minor or patch");
 		} else if(MajorDot < 1) {
 			// If first symbol is a dot, there is no Major.
-			throw new Exception("There is no major version number");
+			throw new SemVerException("There is no major version number");
 		} else if((MinorDot < 1) || (MinorDot - MajorDot < 2)) {
 			// If there is nothing between MajorDot and MinorDot.
-			throw new Exception("There is no minor version number");
+			throw new SemVerException("There is no minor version number");
 		} else if(
 			((PreReleaseStart < 1) && (i.length - MinorDot < 2)) ||
 			((PreReleaseStart >= 0) && (PreReleaseStart - MinorDot < 2))) {
 			// There is no Patch, if there is nothing after MinorDot.
 			// and string end or `-`.
-			throw new Exception("There is no patch version number");
+			throw new SemVerException("There is no patch version number");
 		} else if(
 			((BuildStart < 1) && (i.length - PreReleaseStart < 2)) ||
 			((BuildStart >= 0) && (BuildStart - PreReleaseStart < 2))) {
 			// There is nothing in PreRelease, if nothing follow `-` .
-				throw new Exception("There is no prerelease version string");
+				throw new SemVerException("There is no prerelease version string");
 		} else if(i.length - BuildStart < 2) {
 			// There is no in Build, if string ends after `+`.
-			throw new Exception("There is no build version string");
+			throw new SemVerException("There is no build version string");
 		}
 
 		// Now we know where Major, Minor, Patch, PreRelease, Build starts and ends.
 		if(i[0..MajorDot].isNumeric) {
 			Major = to!size_t(i[0..MajorDot]);
 		} else {
-			throw new Exception("There is a non-number characters in major");
+			throw new SemVerException("There is a non-number characters in major");
 		}
 
 		if(i[MajorDot+1..MinorDot].isNumeric) {
 			Minor = to!size_t(i[MajorDot+1..MinorDot]);
 		} else {
-			throw new Exception("There is a non-number characters in minor");
+			throw new SemVerException("There is a non-number characters in minor");
 		}
 
 		if(PreReleaseStart != -1) {
 			if(i[MinorDot+1..PreReleaseStart].isNumeric) {
 				Patch = to!size_t(i[MinorDot+1..PreReleaseStart]);
 			} else {
-				throw new Exception("There is a non-number in patch");
+				throw new SemVerException("There is a non-number in patch");
 			}
 			if(BuildStart != -1) {
 				PreRelease = i[PreReleaseStart+1..BuildStart];
@@ -83,14 +101,14 @@ struct SemVer {
 				if(i[MinorDot+1..BuildStart].isNumeric) {
 					Patch = to!size_t(i[MinorDot+1..BuildStart]);
 				} else {
-					throw new Exception("There is a non-number in patch");
+					throw new SemVerException("There is a non-number in patch");
 				}
 				Build = i[BuildStart+1..$];
 			} else {
 				if(i[MinorDot+1..$].isNumeric) {
 					Patch = to!size_t(i[MinorDot+1..$]);
 				} else {
-					throw new Exception("There is a non-number in patch");
+					throw new SemVerException("There is a non-number in patch");
 				}
 			}
 		}

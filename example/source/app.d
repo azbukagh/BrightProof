@@ -8,7 +8,7 @@ int main(string[] args) {
 	try {
 		a = SemVer(args[1]);
 		b = SemVer(args[2]);
-	} catch (Exception e) {
+	} catch (SemVerException e) {
 		writeln("Some errors. Check your input and try again");
 		writeln(e.toString);
 		return -2;
