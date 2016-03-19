@@ -5,11 +5,33 @@ import std.conv : to;
 import core.time : Duration;
 import core.exception : AssertError;
 
+bool anyErrors = false;
+AssertError[] assertError;
+SemVerException[] semVerError;
+
 void main() {
-	auto r = benchmark!(cmpTest, validationTest, buildTest)(1);
-	writeln("cmpTest(): ", to!Duration(r[0]));
-	writeln("validationTest(): ", to!Duration(r[1]));
-	writeln("buildTest(): ", to!Duration(r[2]));
+	write("cmpTest()... ");
+	auto cmpTestR = benchmark!(cmpTest)(1);
+	writefln("%s in %s", anyErrors ? "FAIL" : "OK", to!Duration(cmpTestR[0]));
+	anyErrors = false;
+
+	write("validationTest()... ");
+	auto validationTestR = benchmark!(validationTest)(1);
+	writefln("%s in %s", anyErrors ? "FAIL" : "OK", to!Duration(validationTestR[0]));
+	anyErrors = false;
+
+	write("buildTest()... ");
+	auto buildTestR = benchmark!(buildTest)(1);
+	writefln("%s in %s", anyErrors ? "FAIL" : "OK", to!Duration(buildTestR[0]));
+	anyErrors = false;
+
+	if(assertError)
+		foreach(AssertError a; assertError)
+			writeln(a.toString);
+	if(semVerError)
+		foreach(SemVerException e; semVerError)
+			writeln(e.toString);
+
 }
 
 void cmpTest() {
@@ -35,7 +57,11 @@ void cmpTest() {
 		assert(SemVer("1.0.0+build.34") > SemVer("1.0.0-rc.42"));
 		assert(SemVer("1.0.0-rc.1+build.34") > SemVer("1.0.0-rc.1"));
 	} catch (AssertError a) {
-		error(a, __FUNCTION__);
+		assertError ~= a;
+		anyErrors = true;
+	} catch (SemVerException e) {
+		semVerError ~= e;
+		anyErrors = true;
 	}
 }
 
@@ -46,7 +72,8 @@ void validationTest() {
 		SemVer("1.0.0-eyyyyup");
 		SemVer("1.0.0-yay+build");
 	} catch (SemVerException e) {
-		error(e, __FUNCTION__);
+		semVerError ~= e;
+		anyErrors = true;
 	}
 }
 
@@ -59,14 +86,11 @@ void buildTest() {
 		s.nextMinor;
 		s.nextMinor;
 		assert(s.toString == "35.2.0");
-	} catch (SemVerException e) {
-		error(e, __FUNCTION__);
 	} catch (AssertError a) {
-		error(a, __FUNCTION__);
+		assertError ~= a;
+		anyErrors = true;
+	} catch (SemVerException e) {
+		semVerError ~= e;
+		anyErrors = true;
 	}
-}
-
-void error(T)(T a, string f = __FUNCTION__) {
-	writefln("Error in %s", f);
-	writeln(a.toString);
 }
