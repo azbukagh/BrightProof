@@ -1,4 +1,5 @@
 module BrightProof;
+
 /**
 * Exception for easy error handling
 */
@@ -38,7 +39,7 @@ struct SemVer {
 	* Throws: SemVerException if there is any syntax errors.
 	*/
 	this(string i) {
-		import std.string : indexOf, isNumeric;
+		import std.string : indexOf;
 		import std.conv : to;
 
 		auto MajorDot = indexOf(i, ".", 0);
@@ -72,22 +73,22 @@ struct SemVer {
 		}
 
 		// Now we know where Major, Minor, Patch, PreRelease, Build starts and ends.
-		if(i[0..MajorDot].isNumeric) {
+		try {
 			Major = to!size_t(i[0..MajorDot]);
-		} else {
+		} catch {
 			throw new SemVerException("There is a non-number characters in major");
 		}
 
-		if(i[MajorDot+1..MinorDot].isNumeric) {
+		try {
 			Minor = to!size_t(i[MajorDot+1..MinorDot]);
-		} else {
+		} catch {
 			throw new SemVerException("There is a non-number characters in minor");
 		}
 
 		if(PreReleaseStart != -1) {
-			if(i[MinorDot+1..PreReleaseStart].isNumeric) {
+			try {
 				Patch = to!size_t(i[MinorDot+1..PreReleaseStart]);
-			} else {
+			} catch {
 				throw new SemVerException("There is a non-number in patch");
 			}
 			if(BuildStart != -1) {
@@ -98,16 +99,16 @@ struct SemVer {
 			}
 		} else {
 			if(BuildStart != -1) {
-				if(i[MinorDot+1..BuildStart].isNumeric) {
+				try {
 					Patch = to!size_t(i[MinorDot+1..BuildStart]);
-				} else {
+				} catch {
 					throw new SemVerException("There is a non-number in patch");
 				}
 				Build = i[BuildStart+1..$];
 			} else {
-				if(i[MinorDot+1..$].isNumeric) {
+				try {
 					Patch = to!size_t(i[MinorDot+1..$]);
-				} else {
+				} catch {
 					throw new SemVerException("There is a non-number in patch");
 				}
 			}
