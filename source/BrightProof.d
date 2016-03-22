@@ -1,3 +1,10 @@
+/**
+* Authors: Azbuka-slovensko
+* License: MIT, see LICENCE.md
+* Copyright: Azbuka-slovensko 2016
+* See_Also:
+*	Semantic Versioning http://semver.org/
+*/
 module BrightProof;
 
 /**
