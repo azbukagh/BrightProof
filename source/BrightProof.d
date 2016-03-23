@@ -145,12 +145,12 @@ struct SemVer {
 	/// ditto
 	void nextPatch() {
 		Patch++;
-		PreRelease = Build = "";
+		PreRelease.length = Build.length = 0;
 	}
 
 	/**
 	* Convert SemVer to string
-	* Returns: SemVer in string (MAJOR.MINOR.PATCH-IDENTIFIER+META)
+	* Returns: SemVer in string (MAJOR.MINOR.PATCH-PRERELEASE+BUILD)
 	*/
 	string toString() {
 		import std.format : format;

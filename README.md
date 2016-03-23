@@ -2,6 +2,11 @@ BrightProof
 =============
 SemVer 2.0.0 parser
 
+## Building
+BrightProof tested on ArchLinux x64 with:
+- DMD 2.070
+- LDC 0.17.0 (based on DMD v2.068.2 and LLVM 3.7.1)
+
 ## Usage
 1. Add brightproof to your dub.json as dependency.
 2. Import it:
@@ -17,7 +22,7 @@ ver.toString == "1.0.2-beta";
 
 ## Comparing
 SemVer structs can be compared via `<`, `>`, `==`, `>=`, `<=`, just like any other values.
-Also, Identifiers and Metas now compared too:
+Also, PreReleases and Buildss now compared too:
 ```
 SemVer("1.0.0-rc.1") < SemVer("1.0.0-rc.20");
 SemVer("1.0.0-rc.1") < SemVer("1.0.0");
@@ -28,4 +33,6 @@ SemVer("1.0.0-rc.1") < SemVer("1.0.0+build.1");
 Aviable in `./example`.
 
 ## TODO
-- [x] Change Identifier -> PreRelease and Meta -> Build in 1.0.0.
+- [ ] Fix compilation with GDC 5.3.0
+- [ ] More speed. 
+- [ ] Test on different OS (BSD, Windows), architectures (x86, x86_64) with different compilers (DMD, LDC, GDC)
