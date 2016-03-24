@@ -153,13 +153,16 @@ struct SemVer {
 	* Returns: SemVer in string (MAJOR.MINOR.PATCH-PRERELEASE+BUILD)
 	*/
 	string toString() {
-		import std.format : format;
-		string o = format("%d.%d.%d", Major, Minor, Patch);
+		import std.array : appender;
+		import std.format : formattedWrite;
+
+		auto writer = appender!string();
+		formattedWrite(writer, "%d.%d.%d", Major, Minor, Patch);
 		if(PreRelease != "")
-			o ~= format("-%s", PreRelease);
+			formattedWrite(writer, "-%s", PreRelease);
 		if(Build != "")
-			o ~= format("+%s", Build);
-		return o;
+			formattedWrite(writer, "+%s", Build);
+		return writer.data;
 	}
 
 	/**
