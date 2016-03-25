@@ -33,6 +33,6 @@ SemVer("1.0.0-rc.1") < SemVer("1.0.0+build.1");
 Aviable in `./example`.
 
 ## TODO
-- [ ] Fix compilation with GDC 5.3.0
-- [ ] More speed. 
+- [x] Fix compilation with GDC 5.3.0
+- [x] More speed. 
 - [ ] Test on different OS (BSD, Windows), architectures (x86, x86_64) with different compilers (DMD, LDC, GDC)
