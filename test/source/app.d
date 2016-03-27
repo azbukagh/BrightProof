@@ -5,33 +5,59 @@ import std.conv : to;
 import core.time : Duration;
 import core.exception : AssertError;
 
-bool anyErrors = false;
-AssertError[] assertError;
-SemVerException[] semVerError;
+struct Result {
+	string TestName;
+	Duration Time;
+	bool Failed;
+	AssertError AError;
+	SemVerException SError;
+}
 
-void main() {
-	write("cmpTest()... ");
-	auto cmpTestR = benchmark!(cmpTest)(1);
-	writefln("%s in %s", anyErrors ? "FAIL" : "OK", to!Duration(cmpTestR[0]));
-	anyErrors = false;
+bool testFail = false;
+AssertError assertError = null;
+SemVerException semVerError = null;
 
-	write("validationTest()... ");
-	auto validationTestR = benchmark!(validationTest)(1);
-	writefln("%s in %s", anyErrors ? "FAIL" : "OK", to!Duration(validationTestR[0]));
-	anyErrors = false;
+Result[] runTests(FUN...)() {
+	Result[] o;
+	foreach(f; FUN) {
+		o ~= Result(
+			__traits(identifier, f),
+			to!Duration(benchmark!(f)(1)[0]),
+			testFail,
+			assertError,
+			semVerError
+		);
+		testFail = false;
+		assertError = null;
+		semVerError = null;
+	}
+	return o;
+}
 
-	write("buildTest()... ");
-	auto buildTestR = benchmark!(buildTest)(1);
-	writefln("%s in %s", anyErrors ? "FAIL" : "OK", to!Duration(buildTestR[0]));
-	anyErrors = false;
+int main() {
+	Result[] results = runTests!(
+		cmpTest,
+		validationTest,
+		buildTest)();
 
-	if(assertError)
-		foreach(AssertError a; assertError)
-			writeln(a.toString);
-	if(semVerError)
-		foreach(SemVerException e; semVerError)
-			writeln(e.toString);
+	foreach(r; results)
+		writefln(
+			"%s %s in %s",
+			r.TestName,
+			r.Failed ? "FAILED" : "OK",
+			r.Time
+		);
 
+	bool anyFailed = false;
+	foreach(r; results) {
+		if(r.AError)
+			writeln(r.AError);
+		if(r.SError)
+			writeln(r.SError);
+		if(r.Failed)
+			anyFailed = true;
+	}
+	return anyFailed ? -1 : 0;
 }
 
 void cmpTest() {
@@ -57,11 +83,11 @@ void cmpTest() {
 		assert(SemVer("1.0.0+build.34") > SemVer("1.0.0-rc.42"));
 		assert(SemVer("1.0.0-rc.1+build.34") > SemVer("1.0.0-rc.1"));
 	} catch (AssertError a) {
-		assertError ~= a;
-		anyErrors = true;
+		assertError = a;
+		testFail = true;
 	} catch (SemVerException e) {
-		semVerError ~= e;
-		anyErrors = true;
+		semVerError = e;
+		testFail = true;
 	}
 }
 
@@ -72,8 +98,8 @@ void validationTest() {
 		SemVer("1.0.0-eyyyyup");
 		SemVer("1.0.0-yay+build");
 	} catch (SemVerException e) {
-		semVerError ~= e;
-		anyErrors = true;
+		semVerError = e;
+		testFail = true;
 	}
 }
 
@@ -87,10 +113,10 @@ void buildTest() {
 		s.nextMinor;
 		assert(s.toString == "35.2.0");
 	} catch (AssertError a) {
-		assertError ~= a;
-		anyErrors = true;
+		assertError = a;
+		testFail = true;
 	} catch (SemVerException e) {
-		semVerError ~= e;
-		anyErrors = true;
+		semVerError = e;
+		testFail = true;
 	}
 }
