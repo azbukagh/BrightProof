@@ -168,7 +168,7 @@ struct SemVer {
 	/**
 	* true, if this == b
 	*/
-	bool opEquals()(auto ref const SemVer b) const {
+	const bool opEquals()(auto ref const SemVer b) {
 		return (this.Major == b.Major) &&
 			(this.Minor == b.Minor) &&
 			(this.Patch == b.Patch) &&
@@ -179,8 +179,9 @@ struct SemVer {
 	/**
 	* Compares two SemVer structs.
 	*/
-	int opCmp(ref const SemVer b) const {
+	const int opCmp(ref const SemVer b) {
 		import natcmp;
+		
 		if(this.Major != b.Major)
 			return this.Major < b.Major ? -1 : 1;
 		else if(this.Minor != b.Minor)
@@ -209,7 +210,7 @@ struct SemVer {
 		return 0;
 	}
 	/// ditto
-	int opCmp(in SemVer b) const {
+	const int opCmp(in SemVer b) {
 		return this.opCmp(b);
 	}
 	///
