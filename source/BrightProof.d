@@ -41,18 +41,24 @@ struct SemVer {
 	string PreRelease, Build;
 
 	/**
+	* Constructor
+	* Define BrightProof_ForceSTD version for force using standard library functions.
+	* Standard library functions is slower, but more safe to use.
+	* Usualy you don't have to use it.
 	* Params:
 	*	i = input string
 	* Throws: SemVerException if there is any syntax errors.
 	*/
-	this(string i) {
-		import std.string : indexOf;
+	pure this(string i) {
+		version(BrightProof_ForceSTD) {
+			import std.string : indexOf;
+		}
 		import std.conv : to;
 
-		auto MajorDot = indexOf(i, ".", 0);
-		auto MinorDot = indexOf(i, ".", MajorDot + 1);
-		auto PreReleaseStart = indexOf(i, "-", MinorDot + 1);
-		auto BuildStart = indexOf(i, "+", PreReleaseStart + 1);
+		auto MajorDot = indexOf(i, '.', 0);
+		auto MinorDot = indexOf(i, '.', MajorDot + 1);
+		auto PreReleaseStart = indexOf(i, '-', MinorDot + 1);
+		auto BuildStart = indexOf(i, '+', PreReleaseStart + 1);
 
 		if((MajorDot == -1) || (MinorDot == -1)) {
 			// If there is no 2 dots - this is not complete semver.
@@ -131,28 +137,28 @@ struct SemVer {
 	* 	1.2.3 -> nextPatch -> 1.2.4
 	* 	1.2.3-rc.1+build.5 -> nextPatch -> 1.2.4
 	*/
-	void nextMajor() {
+	@safe @nogc pure nothrow void nextMajor() {
 		Major++;
 		Minor = Patch = 0;
-		PreRelease.length = Build.length = 0;
+		PreRelease = Build = "";
 	}
 	/// ditto
-	void nextMinor() {
+	@safe @nogc pure nothrow void nextMinor() {
 		Minor++;
 		Patch = 0;
-		PreRelease.length = Build.length = 0;
+		PreRelease = Build = "";
 	}
 	/// ditto
-	void nextPatch() {
+	@safe @nogc pure nothrow void nextPatch() {
 		Patch++;
-		PreRelease.length = Build.length = 0;
+		PreRelease = Build = "";
 	}
 
 	/**
 	* Convert SemVer to string
 	* Returns: SemVer in string (MAJOR.MINOR.PATCH-PRERELEASE+BUILD)
 	*/
-	string toString() {
+	@safe pure string toString() {
 		import std.array : appender;
 		import std.format : formattedWrite;
 
@@ -168,7 +174,7 @@ struct SemVer {
 	/**
 	* true, if this == b
 	*/
-	const bool opEquals()(auto ref const SemVer b) {
+	@safe @nogc pure nothrow const bool opEquals()(auto ref const SemVer b) {
 		return (this.Major == b.Major) &&
 			(this.Minor == b.Minor) &&
 			(this.Patch == b.Patch) &&
@@ -179,7 +185,7 @@ struct SemVer {
 	/**
 	* Compares two SemVer structs.
 	*/
-	const int opCmp(ref const SemVer b) {
+	@safe const int opCmp(ref const SemVer b) {
 		import natcmp;
 		
 		if(this.Major != b.Major)
@@ -210,7 +216,7 @@ struct SemVer {
 		return 0;
 	}
 	/// ditto
-	const int opCmp(in SemVer b) {
+	@safe const int opCmp(in SemVer b) {
 		return this.opCmp(b);
 	}
 	///
@@ -225,5 +231,16 @@ struct SemVer {
 		assert(SemVer("1.0.0-rc.1") < SemVer("1.0.0+build.9"));
 		assert(SemVer("1.0.0-rc.1") < SemVer("1.0.0-rc.1+build.5"));
 		assert(SemVer("1.0.0-rc.1+build.5") == SemVer("1.0.0-rc.1+build.5"));
+	}
+
+	version(BrightProof_ForceSTD) {
+	} else {
+		private @safe @nogc pure nothrow ptrdiff_t indexOf(string input, char find, size_t start = 0) {
+			for(ptrdiff_t s = start; s < input.length; s++)
+				if(input[s] == find)
+					return s;
+
+			return -1;
+		}
 	}
 }
