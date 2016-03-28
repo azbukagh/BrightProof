@@ -38,7 +38,8 @@ int main() {
 	Result[] results = runTests!(
 		cmpTest,
 		validationTest,
-		buildTest)();
+		buildTest,
+		largeValuesTest)();
 
 	foreach(r; results)
 		writefln(
@@ -115,6 +116,18 @@ void buildTest() {
 	} catch (AssertError a) {
 		assertError = a;
 		testFail = true;
+	} catch (SemVerException e) {
+		semVerError = e;
+		testFail = true;
+	}
+}
+
+void largeValuesTest() {
+	try {
+		SemVer(to!string(size_t.max) ~
+			"." ~ to!string(size_t.max) ~
+			"." ~ to!string(size_t.max)
+		);
 	} catch (SemVerException e) {
 		semVerError = e;
 		testFail = true;
