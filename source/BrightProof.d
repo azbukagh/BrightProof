@@ -50,9 +50,7 @@ struct SemVer {
 	* Throws: SemVerException if there is any syntax errors.
 	*/
 	pure this(string i) {
-		version(BrightProof_ForceSTD) {
-			import std.string : indexOf;
-		}
+		import std.string : indexOf;
 		import std.conv : to;
 
 		auto MajorDot = indexOf(i, '.', 0);
@@ -231,16 +229,5 @@ struct SemVer {
 		assert(SemVer("1.0.0-rc.1") < SemVer("1.0.0+build.9"));
 		assert(SemVer("1.0.0-rc.1") < SemVer("1.0.0-rc.1+build.5"));
 		assert(SemVer("1.0.0-rc.1+build.5") == SemVer("1.0.0-rc.1+build.5"));
-	}
-
-	version(BrightProof_ForceSTD) {
-	} else {
-		private @safe @nogc pure nothrow ptrdiff_t indexOf(string input, char find, size_t start = 0) {
-			for(ptrdiff_t s = start; s < input.length; s++)
-				if(input[s] == find)
-					return s;
-
-			return -1;
-		}
 	}
 }
