@@ -71,7 +71,7 @@ void cmpTest() {
 		assert(SemVer("1.0.0-beta.11") < SemVer("1.0.0-rc.1"));
 		assert(SemVer("1.0.0-rc.1") < SemVer("1.0.0"));
 		assert(SemVer("1.0.0-rc.1") < SemVer("1.0.0+build.9"));
-		assert(SemVer("1.0.0-rc.1") < SemVer("1.0.0-rc.1+build.5"));
+		assert(SemVer("1.0.0-rc.1") == SemVer("1.0.0-rc.1+build.5"));
 		assert(SemVer("1.0.0-rc.1+build.5") == SemVer("1.0.0-rc.1+build.5"));
 
 		assert(SemVer("1.0.0-alpha.1") > SemVer("1.0.0-alpha"));
@@ -82,7 +82,7 @@ void cmpTest() {
 		assert(SemVer("1.0.0-rc.1") > SemVer("1.0.0-beta.11"));
 		assert(SemVer("1.0.0") > SemVer("1.0.0-rc.42"));
 		assert(SemVer("1.0.0+build.34") > SemVer("1.0.0-rc.42"));
-		assert(SemVer("1.0.0-rc.1+build.34") > SemVer("1.0.0-rc.1"));
+		assert(SemVer("1.0.0-rc.1+build.34") == SemVer("1.0.0-rc.1"));
 	} catch (AssertError a) {
 		assertError = a;
 		testFail = true;
@@ -123,6 +123,18 @@ void buildTest() {
 }
 
 void largeValuesTest() {
+	try {
+		SemVer(to!string(size_t.max) ~
+			"." ~ to!string(size_t.max) ~
+			"." ~ to!string(size_t.max)
+		);
+	} catch (SemVerException e) {
+		semVerError = e;
+		testFail = true;
+	}
+}
+
+void strangeVersionsTest() {
 	try {
 		SemVer(to!string(size_t.max) ~
 			"." ~ to!string(size_t.max) ~

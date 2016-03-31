@@ -176,8 +176,7 @@ struct SemVer {
 		return (this.Major == b.Major) &&
 			(this.Minor == b.Minor) &&
 			(this.Patch == b.Patch) &&
-			(this.PreRelease == b.PreRelease) &&
-			(this.Build == b.Build);
+			(this.PreRelease == b.PreRelease);
 	}
 
 	/**
@@ -185,7 +184,10 @@ struct SemVer {
 	*/
 	@safe const int opCmp(ref const SemVer b) {
 		import natcmp;
-		
+
+		if(this == b)
+			return 0;
+
 		if(this.Major != b.Major)
 			return this.Major < b.Major ? -1 : 1;
 		else if(this.Minor != b.Minor)
@@ -204,14 +206,7 @@ struct SemVer {
 			return 1;
 		}
 
-		if((this.Build != "") && (b.Build != "")) {
-			return compareNatural(this.PreRelease, b.PreRelease);
-		} else if(this.Build != "") {
-			return 1;
-		} else if(b.Build != "") {
-			return -1;
-		}
-		return 0;
+		throw new SemVerException("I don't know, how you got that error: SemVer is not an equal, but also not an different");
 	}
 	/// ditto
 	@safe const int opCmp(in SemVer b) {
@@ -226,8 +221,8 @@ struct SemVer {
 		assert(SemVer("1.0.0-beta.2") < SemVer("1.0.0-beta.11"));
 		assert(SemVer("1.0.0-beta.11") < SemVer("1.0.0-rc.1"));
 		assert(SemVer("1.0.0-rc.1") < SemVer("1.0.0"));
-		assert(SemVer("1.0.0-rc.1") < SemVer("1.0.0+build.9"));
-		assert(SemVer("1.0.0-rc.1") < SemVer("1.0.0-rc.1+build.5"));
+		assert(SemVer("1.0.0-rc.1") == SemVer("1.0.0+build.9"));
+		assert(SemVer("1.0.0-rc.1") == SemVer("1.0.0-rc.1+build.5"));
 		assert(SemVer("1.0.0-rc.1+build.5") == SemVer("1.0.0-rc.1+build.5"));
 	}
 }
