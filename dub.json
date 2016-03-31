@@ -1,6 +1,6 @@
 {
 	"name": "brightproof",
-	"description": "SemVer is never been so easy",
+	"description": "Semantic Versioning 2.0.0 library",
 	"authors": ["Azbuka-slovensko"],
 	"copyright": "2016 Azbuka-slovensko",
 	"license": "MIT",
