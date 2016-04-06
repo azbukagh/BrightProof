@@ -42,9 +42,6 @@ struct SemVer {
 
 	/**
 	* Constructor
-	* Define BrightProof_ForceSTD version for force using standard library functions.
-	* Standard library functions is slower, but more safe to use.
-	* Usualy you don't have to use it.
 	* Params:
 	*	i = input string
 	* Throws: SemVerException if there is any syntax errors.
