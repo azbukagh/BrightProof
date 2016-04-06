@@ -30,6 +30,8 @@ Aviable in `./example`.
 
 ## Building
 BrightProof tested on:
+
+
 | OS | Architecture | Compiler |
 |----|--------------|----------|
 | Archlinux | x86, x86_64 | DMD 2.070 |
