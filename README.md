@@ -2,11 +2,6 @@ BrightProof
 =============
 SemVer 2.0.0 parser
 
-## Building
-BrightProof tested on ArchLinux x64 with:
-- DMD 2.070
-- LDC 0.17.0 (based on DMD v2.068.2 and LLVM 3.7.1)
-
 ## Usage
 1. Add brightproof to your dub.json as dependency.
 2. Import it:
@@ -31,6 +26,17 @@ SemVer("1.0.0-rc.1") < SemVer("1.0.0+build.1");
 
 ## Example
 Aviable in `./example`.
+
+
+## Building
+BrightProof tested on:
+| OS | Architecture | Compiler |
+|----|--------------|----------|
+| Archlinux | x86, x86_64 | DMD 2.070 |
+| Archlinux | x86_64 | LDC 0.17.0 |
+| Archlinux | x86_64 | GDC 5.3.0 |
+|----|--------------|----------|
+
 
 ## TODO
 - [ ] Test on different OS (BSD, Windows), architectures (x86, x86_64) with different compilers (DMD, LDC, GDC)
