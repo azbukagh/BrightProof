@@ -47,7 +47,7 @@ struct SemVer {
 	* Throws: SemVerException if there is any syntax errors.
 	*/
 	pure this(string i) {
-		import std.string : indexOf;
+		import std.string : indexOf, isNumeric;
 		import std.conv : to;
 
 		auto MajorDot = indexOf(i, '.', 0);
@@ -80,23 +80,31 @@ struct SemVer {
 			throw new SemVerException("There is no build version string");
 		}
 
-		// Now we know where Major, Minor, Patch, PreRelease, Build starts and ends.
-		try {
+		if(isNumeric(i[0..MajorDot])) {
+			if((MajorDot > 1) && (to!size_t(i[0..1]) == 0))
+				throw new SemVerException("Major cannot begin with '0'");
+
 			Major = to!size_t(i[0..MajorDot]);
-		} catch {
+		} else {
 			throw new SemVerException("There is a non-number characters in major");
 		}
 
-		try {
+		if(isNumeric(i[MajorDot+1..MinorDot])) {
+			if((MinorDot - MajorDot > 2) && (to!size_t(i[MajorDot+1..MajorDot+2]) == 0))
+				throw new SemVerException("Minor cannot begin with '0'");
+
 			Minor = to!size_t(i[MajorDot+1..MinorDot]);
-		} catch {
+		} else {
 			throw new SemVerException("There is a non-number characters in minor");
 		}
 
 		if(PreReleaseStart != -1) {
-			try {
+			if(isNumeric(i[MinorDot+1..PreReleaseStart])) {
+				if((PreReleaseStart - MinorDot > 2) && (to!size_t(i[MinorDot+1..MinorDot+2]) == 0))
+					throw new SemVerException("Patch cannot begin with '0'");
+
 				Patch = to!size_t(i[MinorDot+1..PreReleaseStart]);
-			} catch {
+			} else {
 				throw new SemVerException("There is a non-number in patch");
 			}
 			if(BuildStart != -1) {
@@ -107,16 +115,22 @@ struct SemVer {
 			}
 		} else {
 			if(BuildStart != -1) {
-				try {
+				if(isNumeric(i[MinorDot+1..BuildStart])) {
+					if((BuildStart - MinorDot > 2) && (to!size_t(i[MinorDot+1..MinorDot+2]) == 0))
+						throw new SemVerException("Patch cannot begin with '0'");
+
 					Patch = to!size_t(i[MinorDot+1..BuildStart]);
-				} catch {
+				} else {
 					throw new SemVerException("There is a non-number in patch");
 				}
 				Build = i[BuildStart+1..$];
 			} else {
-				try {
+				if(isNumeric(i[MinorDot+1..$])) {
+					if((i.length - MinorDot > 2) && (to!size_t(i[MinorDot+1..MinorDot+2]) == 0))
+						throw new SemVerException("Patch cannot begin with '0'");
+
 					Patch = to!size_t(i[MinorDot+1..$]);
-				} catch {
+				} else {
 					throw new SemVerException("There is a non-number in patch");
 				}
 			}
