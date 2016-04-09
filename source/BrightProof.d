@@ -124,7 +124,6 @@ struct SemVer {
 			}
 			if(BuildStart) {
 				PreRelease = i[PreReleaseStart+1..BuildStart];
-				Build = i[BuildStart+1..$];
 			} else {
 				PreRelease = i[PreReleaseStart+1..$];
 			}
