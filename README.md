@@ -42,5 +42,4 @@ BrightProof tested on:
 
 ## TODO
 - [ ] Test on different OS (BSD, Windows), architectures (x86, x86_64) with different compilers (DMD, LDC, GDC)
-- [ ] Parser must report error, if MAJOR, MINOR or PATCH starts with `0`. 
-- [ ] Because I can't rewrite phobos's `to`, I need to completly rewrite parser.
+- [x] Parser must report error, if MAJOR, MINOR or PATCH starts with `0`. 
