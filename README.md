@@ -1,4 +1,4 @@
-BrightProof
+# BrightProof [![Page on DUB](https://img.shields.io/dub/v/brightproof.svg)](http://code.dlang.org/packages/brightproof) [![Licence](https://img.shields.io/dub/l/brightproof.svg)](https://github.com/azbukagh/BrightProof/blob/master/LICENCE.md)
 =============
 SemVer 2.0.0 parser
 
@@ -42,4 +42,4 @@ BrightProof tested on:
 
 ## TODO
 - [ ] Test on different OS (BSD, Windows), architectures (x86, x86_64) with different compilers (DMD, LDC, GDC)
-- [x] Parser must report error, if MAJOR, MINOR or PATCH starts with `0`. 
+
