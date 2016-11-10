@@ -1,11 +1,13 @@
 /**
-* Authors: Azbuka-slovensko
+* Authors: Azbuka
 * License: MIT, see LICENCE.md
-* Copyright: Azbuka-slovensko 2016
+* Copyright: Azbuka 2016
 * See_Also:
 *	Semantic Versioning http://semver.org/
 */
 module BrightProof;
+
+import std.traits : isNarrowString;
 
 /**
 * Exception for easy error handling
@@ -46,7 +48,8 @@ struct SemVer {
 	*	i = input string
 	* Throws: SemVerException if there is any syntax errors.
 	*/
-	pure this(string i) {
+	pure this(T)(T i)
+	if(isNarrowString!T){
 		import std.string : isNumeric;
 		import std.conv : to;
 
@@ -74,7 +77,7 @@ struct SemVer {
 		}
 
 		if(MajorDot == 0) {
-			// If first symbol is a dot, there is no Major.
+			// If first symbol is a dot there is no Major.
 			throw new SemVerException("There is no major version number");
 		} else if(!MinorDot || (MinorDot - MajorDot < 2)) {
 			// If there is nothing between MajorDot and MinorDot.
@@ -82,45 +85,44 @@ struct SemVer {
 		} else if(
 			(!PreReleaseStart && (i.length - MinorDot < 2)) ||
 			(!PreReleaseStart && (PreReleaseStart - MinorDot < 2))) {
-			// There is no Patch, if there is nothing after MinorDot.
-			// and string end or `-`.
+			// There is no Patch if nothing follows MinorDot
 			throw new SemVerException("There is no patch version number");
 		} else if(
 			(!BuildStart && (i.length - PreReleaseStart < 2)) ||
 			((BuildStart > 0) && (BuildStart - PreReleaseStart < 2))) {
-			// There is nothing in PreRelease, if nothing follow `-` .
+			// PreRelease is empty if nothing follows`-` .
 				throw new SemVerException("There is no prerelease version string");
 		} else if(i.length - BuildStart < 2) {
-			// There is no in Build, if string ends after `+`.
+			// Build is empty if nothing follow `+`.
 			throw new SemVerException("There is no build version string");
 		}
 
 		if(isNumeric(i[0..MajorDot])) {
 			if((MajorDot > 1) && (to!size_t(i[0..1]) == 0))
-				throw new SemVerException("Major cannot begin with '0'");
+				throw new SemVerException("Major starts with '0'");
 
 			Major = to!size_t(i[0..MajorDot]);
 		} else {
-			throw new SemVerException("There is a non-number in major");
+			throw new SemVerException("There is a non-number character in major");
 		}
 
 		if(isNumeric(i[MajorDot+1..MinorDot])) {
 			if((MinorDot - MajorDot > 2) && (to!size_t(i[MajorDot+1..MajorDot+2]) == 0))
-				throw new SemVerException("Minor cannot begin with '0'");
+				throw new SemVerException("Minor starts with '0'");
 
 			Minor = to!size_t(i[MajorDot+1..MinorDot]);
 		} else {
-			throw new SemVerException("There is a non-number in minor");
+			throw new SemVerException("There is a non-number character in minor");
 		}
 
 		if(PreReleaseStart) {
 			if(isNumeric(i[MinorDot+1..PreReleaseStart])) {
 				if((PreReleaseStart - MinorDot > 2) && (to!size_t(i[MinorDot+1..MinorDot+2]) == 0))
-					throw new SemVerException("Patch cannot begin with '0'");
+					throw new SemVerException("Patch starts with '0'");
 
 				Patch = to!size_t(i[MinorDot+1..PreReleaseStart]);
 			} else {
-				throw new SemVerException("There is a non-number in patch");
+				throw new SemVerException("There is a non-number character in patch");
 			}
 			if(BuildStart) {
 				PreRelease = i[PreReleaseStart+1..BuildStart];
@@ -131,21 +133,21 @@ struct SemVer {
 			if(BuildStart) {
 				if(isNumeric(i[MinorDot+1..BuildStart])) {
 					if((BuildStart - MinorDot > 2) && (to!size_t(i[MinorDot+1..MinorDot+2]) == 0))
-						throw new SemVerException("Patch cannot begin with '0'");
+						throw new SemVerException("Patch starts with '0'");
 
 					Patch = to!size_t(i[MinorDot+1..BuildStart]);
 				} else {
-					throw new SemVerException("There is a non-number in patch");
+					throw new SemVerException("There is a non-number character in patch");
 				}
 				Build = i[BuildStart+1..$];
 			} else {
 				if(isNumeric(i[MinorDot+1..$])) {
 					if((i.length - MinorDot > 2) && (to!size_t(i[MinorDot+1..MinorDot+2]) == 0))
-						throw new SemVerException("Patch cannot begin with '0'");
+						throw new SemVerException("Patch starts with '0'");
 
 					Patch = to!size_t(i[MinorDot+1..$]);
 				} else {
-					throw new SemVerException("There is a non-number in patch");
+					throw new SemVerException("There is a non-number character in patch");
 				}
 			}
 		}
@@ -153,7 +155,7 @@ struct SemVer {
 
 	/**
 	* Next Major/Minor/Patch version
-	* Increments numbers with semver rules.
+	* Increments version in semver way
 	* Example:
 	* 	1.2.3 -> nextMajor -> 2.0.0
 	* 	1.2.3 -> nextMinor -> 1.3.0
@@ -207,6 +209,7 @@ struct SemVer {
 	/**
 	* Compares two SemVer structs.
 	*/
+version(Have_natcmp):
 	@safe const int opCmp(ref const SemVer b) {
 		import natcmp;
 
