@@ -162,21 +162,24 @@ struct SemVer {
 	* 	1.2.3 -> nextPatch -> 1.2.4
 	* 	1.2.3-rc.1+build.5 -> nextPatch -> 1.2.4
 	*/
-	@safe @nogc pure nothrow void nextMajor() {
-		Major++;
-		Minor = Patch = 0;
-		PreRelease = Build = "";
+	@safe @nogc pure nothrow SemVer nextMajor() {
+		this.Major++;
+		this.Minor = this.Patch = 0;
+		this.PreRelease = this.Build = "";
+		return this;
 	}
 	/// ditto
-	@safe @nogc pure nothrow void nextMinor() {
-		Minor++;
-		Patch = 0;
-		PreRelease = Build = "";
+	@safe @nogc pure nothrow SemVer nextMinor() {
+		this.Minor++;
+		this.Patch = 0;
+		this.PreRelease = this.Build = "";
+		return this;
 	}
 	/// ditto
-	@safe @nogc pure nothrow void nextPatch() {
-		Patch++;
-		PreRelease = Build = "";
+	@safe @nogc pure nothrow SemVer nextPatch() {
+		this.Patch++;
+		this.PreRelease = this.Build = "";
+		return this;
 	}
 
 	/**
