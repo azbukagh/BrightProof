@@ -35,11 +35,18 @@ Result[] runTests(FUN...)() {
 }
 
 int main() {
-	Result[] results = runTests!(
-		cmpTest,
-		validationTest,
-		buildTest,
-		largeValuesTest)();
+	version(Have_natcmp) {
+		Result[] results = runTests!(
+			cmpTest,
+			validationTest,
+			buildTest,
+			largeValuesTest)();
+	} else {
+		Result[] results = runTests!(
+			validationTest,
+			buildTest,
+			largeValuesTest)();
+	}
 
 	foreach(r; results)
 		writefln(
@@ -61,34 +68,36 @@ int main() {
 	return anyFailed ? -1 : 0;
 }
 
-void cmpTest() {
-	try {
-		assert(SemVer("1.0.0-alpha") < SemVer("1.0.0-alpha.1"));
-		assert(SemVer("1.0.0-alpha.1") < SemVer("1.0.0-alpha.beta"));
-		assert(SemVer("1.0.0-alpha.beta") < SemVer("1.0.0-beta"));
-		assert(SemVer("1.0.0-beta") < SemVer("1.0.0-beta.2"));
-		assert(SemVer("1.0.0-beta.2") < SemVer("1.0.0-beta.11"));
-		assert(SemVer("1.0.0-beta.11") < SemVer("1.0.0-rc.1"));
-		assert(SemVer("1.0.0-rc.1") < SemVer("1.0.0"));
-		assert(SemVer("1.0.0-rc.1") < SemVer("1.0.0+build.9"));
-		assert(SemVer("1.0.0-rc.1") == SemVer("1.0.0-rc.1+build.5"));
-		assert(SemVer("1.0.0-rc.1+build.5") == SemVer("1.0.0-rc.1+build.5"));
+version(Have_natcmp) {
+	void cmpTest() {
+		try {
+			assert(SemVer("1.0.0-alpha") < SemVer("1.0.0-alpha.1"));
+			assert(SemVer("1.0.0-alpha.1") < SemVer("1.0.0-alpha.beta"));
+			assert(SemVer("1.0.0-alpha.beta") < SemVer("1.0.0-beta"));
+			assert(SemVer("1.0.0-beta") < SemVer("1.0.0-beta.2"));
+			assert(SemVer("1.0.0-beta.2") < SemVer("1.0.0-beta.11"));
+			assert(SemVer("1.0.0-beta.11") < SemVer("1.0.0-rc.1"));
+			assert(SemVer("1.0.0-rc.1") < SemVer("1.0.0"));
+			assert(SemVer("1.0.0-rc.1") < SemVer("1.0.0+build.9"));
+			assert(SemVer("1.0.0-rc.1") == SemVer("1.0.0-rc.1+build.5"));
+			assert(SemVer("1.0.0-rc.1+build.5") == SemVer("1.0.0-rc.1+build.5"));
 
-		assert(SemVer("1.0.0-alpha.1") > SemVer("1.0.0-alpha"));
-		assert(SemVer("1.0.0-alpha.beta") > SemVer("1.0.0-alpha.1"));
-		assert(SemVer("1.0.0-beta") > SemVer("1.0.0-alpha"));
-		assert(SemVer("1.0.0-beta.2") > SemVer("1.0.0-beta"));
-		assert(SemVer("1.0.0-beta.11") > SemVer("1.0.0-beta.2"));
-		assert(SemVer("1.0.0-rc.1") > SemVer("1.0.0-beta.11"));
-		assert(SemVer("1.0.0") > SemVer("1.0.0-rc.42"));
-		assert(SemVer("1.0.0+build.34") > SemVer("1.0.0-rc.42"));
-		assert(SemVer("1.0.0-rc.1+build.34") == SemVer("1.0.0-rc.1"));
-	} catch (AssertError a) {
-		assertError = a;
-		testFail = true;
-	} catch (SemVerException e) {
-		semVerError = e;
-		testFail = true;
+			assert(SemVer("1.0.0-alpha.1") > SemVer("1.0.0-alpha"));
+			assert(SemVer("1.0.0-alpha.beta") > SemVer("1.0.0-alpha.1"));
+			assert(SemVer("1.0.0-beta") > SemVer("1.0.0-alpha"));
+			assert(SemVer("1.0.0-beta.2") > SemVer("1.0.0-beta"));
+			assert(SemVer("1.0.0-beta.11") > SemVer("1.0.0-beta.2"));
+			assert(SemVer("1.0.0-rc.1") > SemVer("1.0.0-beta.11"));
+			assert(SemVer("1.0.0") > SemVer("1.0.0-rc.42"));
+			assert(SemVer("1.0.0+build.34") > SemVer("1.0.0-rc.42"));
+			assert(SemVer("1.0.0-rc.1+build.34") == SemVer("1.0.0-rc.1"));
+		} catch (AssertError a) {
+			assertError = a;
+			testFail = true;
+		} catch (SemVerException e) {
+			semVerError = e;
+			testFail = true;
+		}
 	}
 }
 

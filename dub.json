@@ -10,6 +10,9 @@
 		"./test"
 	],
 	"dependencies": {
-		"natcmp": "1.2.3"
+		"natcmp": {
+			"version": "1.2.3",
+			"optional": true
+		}
 	}
 }
