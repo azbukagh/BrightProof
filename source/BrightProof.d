@@ -101,7 +101,7 @@ struct SemVer {
 			if((MajorDot > 1) && (to!size_t(i[0..1]) == 0))
 				throw new SemVerException("Major starts with '0'");
 
-			Major = to!size_t(i[0..MajorDot]);
+			this.Major = to!size_t(i[0..MajorDot]);
 		} else {
 			throw new SemVerException("There is a non-number character in major");
 		}
@@ -110,7 +110,7 @@ struct SemVer {
 			if((MinorDot - MajorDot > 2) && (to!size_t(i[MajorDot+1..MajorDot+2]) == 0))
 				throw new SemVerException("Minor starts with '0'");
 
-			Minor = to!size_t(i[MajorDot+1..MinorDot]);
+			this.Minor = to!size_t(i[MajorDot+1..MinorDot]);
 		} else {
 			throw new SemVerException("There is a non-number character in minor");
 		}
@@ -120,14 +120,14 @@ struct SemVer {
 				if((PreReleaseStart - MinorDot > 2) && (to!size_t(i[MinorDot+1..MinorDot+2]) == 0))
 					throw new SemVerException("Patch starts with '0'");
 
-				Patch = to!size_t(i[MinorDot+1..PreReleaseStart]);
+				this.Patch = to!size_t(i[MinorDot+1..PreReleaseStart]);
 			} else {
 				throw new SemVerException("There is a non-number character in patch");
 			}
 			if(BuildStart) {
-				PreRelease = i[PreReleaseStart+1..BuildStart];
+				this.PreRelease = i[PreReleaseStart+1..BuildStart];
 			} else {
-				PreRelease = i[PreReleaseStart+1..$];
+				this.PreRelease = i[PreReleaseStart+1..$];
 			}
 		} else {
 			if(BuildStart) {
@@ -135,17 +135,17 @@ struct SemVer {
 					if((BuildStart - MinorDot > 2) && (to!size_t(i[MinorDot+1..MinorDot+2]) == 0))
 						throw new SemVerException("Patch starts with '0'");
 
-					Patch = to!size_t(i[MinorDot+1..BuildStart]);
+					this.Patch = to!size_t(i[MinorDot+1..BuildStart]);
 				} else {
 					throw new SemVerException("There is a non-number character in patch");
 				}
-				Build = i[BuildStart+1..$];
+				this.Build = i[BuildStart+1..$];
 			} else {
 				if(isNumeric(i[MinorDot+1..$])) {
 					if((i.length - MinorDot > 2) && (to!size_t(i[MinorDot+1..MinorDot+2]) == 0))
 						throw new SemVerException("Patch starts with '0'");
 
-					Patch = to!size_t(i[MinorDot+1..$]);
+					this.Patch = to!size_t(i[MinorDot+1..$]);
 				} else {
 					throw new SemVerException("There is a non-number character in patch");
 				}
@@ -191,11 +191,11 @@ struct SemVer {
 		import std.format : formattedWrite;
 
 		auto writer = appender!string();
-		formattedWrite(writer, "%d.%d.%d", Major, Minor, Patch);
+		writer.formattedWrite("%d.%d.%d", this.Major, this.Minor, this.Patch);
 		if(PreRelease != "")
-			formattedWrite(writer, "-%s", PreRelease);
+			writer.formattedWrite("-%s", this.PreRelease);
 		if(Build != "")
-			formattedWrite(writer, "+%s", Build);
+			writer.formattedWrite("+%s", this.Build);
 		return writer.data;
 	}
 
