@@ -35,22 +35,17 @@ Result[] runTests(FUN...)() {
 }
 
 int main() {
-	version(Have_natcmp) {
-		Result[] results = runTests!(
-			cmpTest,
-			validationTest,
-			buildTest,
-			largeValuesTest)();
-	} else {
-		Result[] results = runTests!(
-			validationTest,
-			buildTest,
-			largeValuesTest)();
-	}
+	Result[] results = runTests!(
+		cmpTest,
+		validationTest,
+		buildTest,
+		largeValuesTest,
+		unicodeValuesTest,
+		unicodeCmpTest)();
 
 	foreach(r; results)
 		writefln(
-			"%s %s in %s",
+			"%s\t%s\tin %s",
 			r.TestName,
 			r.Failed ? "FAILED" : "OK",
 			r.Time
@@ -68,45 +63,43 @@ int main() {
 	return anyFailed ? -1 : 0;
 }
 
-version(Have_natcmp) {
-	void cmpTest() {
-		try {
-			assert(SemVer("1.0.0-alpha") < SemVer("1.0.0-alpha.1"));
-			assert(SemVer("1.0.0-alpha.1") < SemVer("1.0.0-alpha.beta"));
-			assert(SemVer("1.0.0-alpha.beta") < SemVer("1.0.0-beta"));
-			assert(SemVer("1.0.0-beta") < SemVer("1.0.0-beta.2"));
-			assert(SemVer("1.0.0-beta.2") < SemVer("1.0.0-beta.11"));
-			assert(SemVer("1.0.0-beta.11") < SemVer("1.0.0-rc.1"));
-			assert(SemVer("1.0.0-rc.1") < SemVer("1.0.0"));
-			assert(SemVer("1.0.0-rc.1") < SemVer("1.0.0+build.9"));
-			assert(SemVer("1.0.0-rc.1") == SemVer("1.0.0-rc.1+build.5"));
-			assert(SemVer("1.0.0-rc.1+build.5") == SemVer("1.0.0-rc.1+build.5"));
+void cmpTest() {
+	try {
+		assert(SemVer!string("1.0.0-alpha") < SemVer!string("1.0.0-alpha.1"));
+		assert(SemVer!string("1.0.0-alpha.1") < SemVer!string("1.0.0-alpha.beta"));
+		assert(SemVer!string("1.0.0-alpha.beta") < SemVer!string("1.0.0-beta"));
+		assert(SemVer!string("1.0.0-beta") < SemVer!string("1.0.0-beta.2"));
+		assert(SemVer!string("1.0.0-beta.2") < SemVer!string("1.0.0-beta.11"));
+		assert(SemVer!string("1.0.0-beta.11") < SemVer!string("1.0.0-rc.1"));
+		assert(SemVer!string("1.0.0-rc.1") < SemVer!string("1.0.0"));
+		assert(SemVer!string("1.0.0-rc.1") < SemVer!string("1.0.0+build.9"));
+		assert(SemVer!string("1.0.0-rc.1") == SemVer!string("1.0.0-rc.1+build.5"));
+		assert(SemVer!string("1.0.0-rc.1+build.5") == SemVer!string("1.0.0-rc.1+build.5"));
 
-			assert(SemVer("1.0.0-alpha.1") > SemVer("1.0.0-alpha"));
-			assert(SemVer("1.0.0-alpha.beta") > SemVer("1.0.0-alpha.1"));
-			assert(SemVer("1.0.0-beta") > SemVer("1.0.0-alpha"));
-			assert(SemVer("1.0.0-beta.2") > SemVer("1.0.0-beta"));
-			assert(SemVer("1.0.0-beta.11") > SemVer("1.0.0-beta.2"));
-			assert(SemVer("1.0.0-rc.1") > SemVer("1.0.0-beta.11"));
-			assert(SemVer("1.0.0") > SemVer("1.0.0-rc.42"));
-			assert(SemVer("1.0.0+build.34") > SemVer("1.0.0-rc.42"));
-			assert(SemVer("1.0.0-rc.1+build.34") == SemVer("1.0.0-rc.1"));
-		} catch (AssertError a) {
-			assertError = a;
-			testFail = true;
-		} catch (SemVerException e) {
-			semVerError = e;
-			testFail = true;
-		}
+		assert(SemVer!string("1.0.0-alpha.1") > SemVer!string("1.0.0-alpha"));
+		assert(SemVer!string("1.0.0-alpha.beta") > SemVer!string("1.0.0-alpha.1"));
+		assert(SemVer!string("1.0.0-beta") > SemVer!string("1.0.0-alpha"));
+		assert(SemVer!string("1.0.0-beta.2") > SemVer!string("1.0.0-beta"));
+		assert(SemVer!string("1.0.0-beta.11") > SemVer!string("1.0.0-beta.2"));
+		assert(SemVer!string("1.0.0-rc.1") > SemVer!string("1.0.0-beta.11"));
+		assert(SemVer!string("1.0.0") > SemVer!string("1.0.0-rc.42"));
+		assert(SemVer!string("1.0.0+build.34") > SemVer!string("1.0.0-rc.42"));
+		assert(SemVer!string("1.0.0-rc.1+build.34") == SemVer!string("1.0.0-rc.1"));
+	} catch (AssertError a) {
+		assertError = a;
+		testFail = true;
+	} catch (SemVerException e) {
+		semVerError = e;
+		testFail = true;
 	}
 }
 
 void validationTest() {
 	try {
-		SemVer("1.0.0");
-		SemVer("1.0.0+4444");
-		SemVer("1.0.0-eyyyyup");
-		SemVer("1.0.0-yay+build");
+		SemVer!string("1.0.0");
+		SemVer!string("1.0.0+4444");
+		SemVer!string("1.0.0-eyyyyup");
+		SemVer!string("1.0.0-yay+build");
 	} catch (SemVerException e) {
 		semVerError = e;
 		testFail = true;
@@ -115,7 +108,7 @@ void validationTest() {
 
 void buildTest() {
 	try {
-		SemVer s = SemVer("34.42.69+build.4");
+		auto s = SemVer!string("34.42.69+build.4");
 		s.nextMinor;
 		s.nextPatch;
 		s.nextMajor;
@@ -133,7 +126,7 @@ void buildTest() {
 
 void largeValuesTest() {
 	try {
-		SemVer(to!string(size_t.max) ~
+		SemVer!string(to!string(size_t.max) ~
 			"." ~ to!string(size_t.max) ~
 			"." ~ to!string(size_t.max)
 		);
@@ -143,12 +136,25 @@ void largeValuesTest() {
 	}
 }
 
-void strangeVersionsTest() {
+void unicodeValuesTest() {
 	try {
-		SemVer(to!string(size_t.max) ~
-			"." ~ to!string(size_t.max) ~
-			"." ~ to!string(size_t.max)
-		);
+		SemVer!dstring("1.0.0-α.1");
+	} catch (SemVerException e) {
+		semVerError = e;
+		testFail = true;
+	}
+}
+
+void unicodeCmpTest() {
+	try {
+		assert(SemVer!dstring("1.0.0-α") < SemVer!dstring("1.0.0-α.1"));
+		assert(SemVer!dstring("1.0.0-α.1") < SemVer!dstring("1.0.0-α.β"));
+		//assert(SemVer!dstring("1.0.0-α.β") < SemVer!dstring("1.0.0-β"));
+		//assert(SemVer!dstring("1.0.0-β") < SemVer!dstring("1.0.0-β.2"));
+		assert(SemVer!dstring("1.0.0-β.2") < SemVer!dstring("1.0.0-β.11"));
+	} catch (AssertError a) {
+		assertError = a;
+		testFail = true;
 	} catch (SemVerException e) {
 		semVerError = e;
 		testFail = true;

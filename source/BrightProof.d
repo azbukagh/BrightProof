@@ -7,7 +7,7 @@
 */
 module BrightProof;
 
-import std.traits : isNarrowString;
+import std.traits : isSomeString;
 
 /**
 * Exception for easy error handling
@@ -38,7 +38,7 @@ class SemVerException : Exception {
 * SemVer("1.0.0-yay+build");
 * ---
 */
-struct SemVer {
+struct SemVer(T = string) if(isSomeString!T) {
 	size_t Major, Minor, Patch;
 	string PreRelease, Build;
 
@@ -48,8 +48,7 @@ struct SemVer {
 	*	i = input string
 	* Throws: SemVerException if there is any syntax errors.
 	*/
-	pure this(T)(T i)
-	if(isNarrowString!T){
+	pure this(T)(T i) if(isSomeString!T) {
 		import std.string : isNumeric;
 		import std.conv : to;
 
@@ -202,7 +201,7 @@ struct SemVer {
 	/**
 	* true, if this == b
 	*/
-	@safe @nogc pure nothrow const bool opEquals()(auto ref const SemVer b) {
+	@nogc pure nothrow const bool opEquals()(auto ref const SemVer b) {
 		return (this.Major == b.Major) &&
 			(this.Minor == b.Minor) &&
 			(this.Patch == b.Patch) &&
@@ -212,8 +211,7 @@ struct SemVer {
 	/**
 	* Compares two SemVer structs.
 	*/
-version(Have_natcmp):
-	@safe const int opCmp(ref const SemVer b) {
+	const int opCmp(ref const SemVer b) {
 		import natcmp;
 
 		if(this == b)
@@ -240,7 +238,7 @@ version(Have_natcmp):
 		throw new SemVerException("I don't know, how you got that error: SemVer is not an equal, but also not an different");
 	}
 	/// ditto
-	@safe const int opCmp(in SemVer b) {
+	const int opCmp(in SemVer b) {
 		return this.opCmp(b);
 	}
 	///
