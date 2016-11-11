@@ -14,5 +14,15 @@
 			"version": "1.2.3",
 			"optional": true
 		}
+	},
+	"buildTypes": {
+		"doc": {
+			"buildOptions": ["syntaxOnly"],
+			"dflags": ["-c", "-Xfdocs.json"],
+			"postBuildCommands": [
+				"dub run whammydoc -- generate-html docs.json ../azbukagh.github.io/brightproof",
+				"rm docs.json __dummy.html"
+			]
+		}
 	}
 }
