@@ -1,12 +1,12 @@
 {
-	"name": "example",
+	"name": "compate",
 	"description": "Example of BrightProof use",
-	"authors": ["Azbuka-slovensko"],
-	"copyright": "2016 Azbuka-slovensko",
+	"authors": ["Azbuka"],
+	"copyright": "2016 Azbuka",
 	"license": "MIT",
 	"dependencies": {
 		"brightproof":{
-			"path": "../"
+			"path": "../../"
 		}
 	}
 }

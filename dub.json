@@ -5,10 +5,6 @@
 	"copyright": "2016 Azbuka",
 	"license": "MIT",
 	"targetType": "library",
-	"subPackages": [
-		"./example",
-		"./test"
-	],
 	"dependencies": {
 		"natcmp": {
 			"version": "~>1.3.2"
