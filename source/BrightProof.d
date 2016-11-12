@@ -43,11 +43,21 @@ struct SemVer {
 	string PreRelease, Build;
 
 	/**
-	* Constructor
-	* Params:
-	*	i = input string
+	* Create new SemVer
 	* Throws: SemVerException if there is any syntax errors.
 	*/
+	@safe @nogc pure nothrow this(size_t major,
+		size_t minor,
+		size_t patch,
+		string prerelease = "",
+		string build = "") {
+			this.Major = major;
+			this.Minor = minor;
+			this.Patch = patch;
+			this.PreRelease = prerelease;
+			this.Build = build;
+	}
+
 	pure this(T)(T i) if(isImplicitlyConvertible!(T, string)) {
 		import std.string : isNumeric;
 		import std.conv : to;
@@ -161,23 +171,23 @@ struct SemVer {
 	* 	1.2.3 -> nextPatch -> 1.2.4
 	* 	1.2.3-rc.1+build.5 -> nextPatch -> 1.2.4
 	*/
-	@safe pure nothrow SemVer nextMajor() {
+	@safe @nogc pure nothrow SemVer nextMajor() {
 		this.Major++;
 		this.Minor = this.Patch = 0;
-		this.PreRelease.length = this.Build.length = 0;
+		this.PreRelease = this.Build = "";
 		return this;
 	}
 	/// ditto
-	@safe pure nothrow SemVer nextMinor() {
+	@safe @nogc pure nothrow SemVer nextMinor() {
 		this.Minor++;
 		this.Patch = 0;
-		this.PreRelease.length = this.Build.length = 0;
+		this.PreRelease = this.Build = "";
 		return this;
 	}
 	/// ditto
-	@safe pure nothrow SemVer nextPatch() {
+	@safe @nogc pure nothrow SemVer nextPatch() {
 		this.Patch++;
-		this.PreRelease.length = this.Build.length = 0;
+		this.PreRelease = this.Build = "";
 		return this;
 	}
 
