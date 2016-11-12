@@ -7,7 +7,7 @@
 */
 module BrightProof;
 
-import std.traits : isSomeString;
+import std.traits : isImplicitlyConvertible;
 
 /**
 * Exception for easy error handling
@@ -38,7 +38,7 @@ class SemVerException : Exception {
 * SemVer("1.0.0-yay+build");
 * ---
 */
-struct SemVer(T = string) if(isSomeString!T) {
+struct SemVer {
 	size_t Major, Minor, Patch;
 	string PreRelease, Build;
 
@@ -48,7 +48,7 @@ struct SemVer(T = string) if(isSomeString!T) {
 	*	i = input string
 	* Throws: SemVerException if there is any syntax errors.
 	*/
-	pure this(T)(T i) if(isSomeString!T) {
+	pure this(T)(T i) if(isImplicitlyConvertible!(T, string)) {
 		import std.string : isNumeric;
 		import std.conv : to;
 
@@ -124,9 +124,9 @@ struct SemVer(T = string) if(isSomeString!T) {
 				throw new SemVerException("There is a non-number character in patch");
 			}
 			if(BuildStart) {
-				this.PreRelease = i[PreReleaseStart+1..BuildStart];
+				this.PreRelease = i[PreReleaseStart+1..BuildStart].to!string;
 			} else {
-				this.PreRelease = i[PreReleaseStart+1..$];
+				this.PreRelease = i[PreReleaseStart+1..$].to!string;
 			}
 		} else {
 			if(BuildStart) {
@@ -138,7 +138,7 @@ struct SemVer(T = string) if(isSomeString!T) {
 				} else {
 					throw new SemVerException("There is a non-number character in patch");
 				}
-				this.Build = i[BuildStart+1..$];
+				this.Build = i[BuildStart+1..$].to!string;
 			} else {
 				if(isNumeric(i[MinorDot+1..$])) {
 					if((i.length - MinorDot > 2) && (to!size_t(i[MinorDot+1..MinorDot+2]) == 0))
@@ -161,23 +161,23 @@ struct SemVer(T = string) if(isSomeString!T) {
 	* 	1.2.3 -> nextPatch -> 1.2.4
 	* 	1.2.3-rc.1+build.5 -> nextPatch -> 1.2.4
 	*/
-	@safe @nogc pure nothrow SemVer nextMajor() {
+	@safe pure nothrow SemVer nextMajor() {
 		this.Major++;
 		this.Minor = this.Patch = 0;
-		this.PreRelease = this.Build = "";
+		this.PreRelease.length = this.Build.length = 0;
 		return this;
 	}
 	/// ditto
-	@safe @nogc pure nothrow SemVer nextMinor() {
+	@safe pure nothrow SemVer nextMinor() {
 		this.Minor++;
 		this.Patch = 0;
-		this.PreRelease = this.Build = "";
+		this.PreRelease.length = this.Build.length = 0;
 		return this;
 	}
 	/// ditto
-	@safe @nogc pure nothrow SemVer nextPatch() {
+	@safe pure nothrow SemVer nextPatch() {
 		this.Patch++;
-		this.PreRelease = this.Build = "";
+		this.PreRelease.length = this.Build.length = 0;
 		return this;
 	}
 

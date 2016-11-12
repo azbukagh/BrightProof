@@ -6,10 +6,10 @@ int main(string[] args) {
 		usage(args);
 		return -1;
 	}
-	SemVer!string a,b;
+	SemVer a,b;
 	try {
-		a = SemVer!string(args[1]);
-		b = SemVer!string(args[2]);
+		a = SemVer(args[1]);
+		b = SemVer(args[2]);
 	} catch (SemVerException e) {
 		writeln("Some errors. Check your input and try again");
 		writeln(e.toString);
