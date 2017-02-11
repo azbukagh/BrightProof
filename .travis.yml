@@ -1,0 +1,11 @@
+language: d
+sudo: false
+
+d:
+	- dmd
+	- ldc
+	- gdc
+
+script:
+	- dub build -b release
+	- dub test
