@@ -2,7 +2,7 @@ language: d
 sudo: false
 
 d:
-	- dmd
-	- ldc
-	- gdc
+  - dmd
+  - ldc
+  - gdc
 
