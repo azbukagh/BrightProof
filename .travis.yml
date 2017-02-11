@@ -6,6 +6,3 @@ d:
 	- ldc
 	- gdc
 
-script:
-	- dub build -b release
-	- dub test
